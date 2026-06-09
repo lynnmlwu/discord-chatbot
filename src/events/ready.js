@@ -19,8 +19,20 @@ export function onReady(client) {
         status: 'online',
       });
     } else {
+      // 計算下一次營業時間（隔天 10:00 台灣時間）
+      const nextWorkTime = new Date(twTime);
+      if (day === 5) {
+        // 週五下班，下次營業是週一 10:00
+        nextWorkTime.setUTCDate(nextWorkTime.getUTCDate() + (8 - day));
+      } else {
+        // 其他時間，下次營業是隔天 10:00
+        nextWorkTime.setUTCDate(nextWorkTime.getUTCDate() + 1);
+      }
+      nextWorkTime.setUTCHours(2, 0, 0, 0); // 隔天 10:00 (UTC+8)
+      const timestamp = Math.floor(nextWorkTime.getTime() / 1000);
+      
       client.user.setPresence({
-        activities: [{ name: '💤 休息中 (平日 10-19 營業)', type: 0 }],
+        activities: [{ name: `💤 休息到 <t:${timestamp}:R>`, type: 0 }],
         status: 'idle',
       });
     }
