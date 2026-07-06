@@ -16,10 +16,10 @@ const client = new Client({
 // 事件綁定
 client.once('clientReady', () => {
   onReady(client);
-  startDungeonReminder(client, {
-    zh: config.discord.dungeonReminderChannelId,
-    en: config.discord.dungeonReminderEnglishChannelId,
-  });
+  // startDungeonReminder(client, {
+  //   zh: config.discord.dungeonReminderChannelId,
+  //   en: config.discord.dungeonReminderEnglishChannelId,
+  // });
 });
 client.on('messageCreate', (message) => onMessageCreate(message, client));
 
