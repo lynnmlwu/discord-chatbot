@@ -115,14 +115,14 @@ export async function onMessageCreate(message, client) {
     const systemPrompt = buildSystemPrompt(responseLang, userMessage);
 
     // 取得對話歷史
-    const history = memory.getHistory(message.channel.id);
+    const history = memory.getHistory(message.author.id);
 
     // 呼叫 LLM
     const response = await chat(systemPrompt, history, userMessage);
 
     // 儲存對話記憶
-    memory.addMessage(message.channel.id, 'user', userMessage);
-    memory.addMessage(message.channel.id, 'model', response);
+    memory.addMessage(message.author.id, 'user', userMessage);
+    memory.addMessage(message.author.id, 'model', response);
 
     // 分段發送（Discord 2000 字元限制）
     const chunks = splitMessage(response);

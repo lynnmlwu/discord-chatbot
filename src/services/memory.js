@@ -2,36 +2,36 @@ import { config } from '../config.js';
 
 /**
  * 短期對話記憶管理
- * 以頻道為單位，保存最近 N 條對話上下文
+ * 以使用者為單位，保存最近 N 條對話上下文
  */
 class MemoryManager {
   constructor() {
     /** @type {Map<string, Array<{role: string, content: string}>>} */
-    this.channels = new Map();
+    this.users = new Map();
     this.maxMessages = config.memory.maxMessages;
   }
 
   /**
-   * 取得某頻道的對話歷史
-   * @param {string} channelId
+   * 取得某使用者的對話歷史
+   * @param {string} userId
    * @returns {Array<{role: string, content: string}>}
    */
-  getHistory(channelId) {
-    return this.channels.get(channelId) || [];
+  getHistory(userId) {
+    return this.users.get(userId) || [];
   }
 
   /**
    * 新增一條對話記錄
-   * @param {string} channelId
+   * @param {string} userId
    * @param {'user'|'model'} role
    * @param {string} content
    */
-  addMessage(channelId, role, content) {
-    if (!this.channels.has(channelId)) {
-      this.channels.set(channelId, []);
+  addMessage(userId, role, content) {
+    if (!this.users.has(userId)) {
+      this.users.set(userId, []);
     }
 
-    const history = this.channels.get(channelId);
+    const history = this.users.get(userId);
     history.push({ role, content });
 
     // 超過上限就從最舊的開始刪，保持成對刪除
@@ -42,11 +42,11 @@ class MemoryManager {
   }
 
   /**
-   * 清除某頻道的記憶
-   * @param {string} channelId
+   * 清除某使用者的記憶
+   * @param {string} userId
    */
-  clear(channelId) {
-    this.channels.delete(channelId);
+  clear(userId) {
+    this.users.delete(userId);
   }
 }
 

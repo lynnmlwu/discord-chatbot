@@ -11,6 +11,6 @@ export const config = {
     model: 'llama-3.3-70b-versatile',
   },
   memory: {
-    maxMessages: 10, // 每個頻道保留的最近對話數
+    maxMessages: 10, // 每個使用者保留的最近對話數
   },
 };
