@@ -117,10 +117,9 @@ export async function onMessageCreate(message, client) {
     // 顯示打字動畫
     await message.channel.sendTyping();
 
-    // 優先依使用者實際訊息判斷語言；若無法判斷，再退回頻道預設
-    const inputLang = detectInputLanguage(userMessage);
+    // 以頻道語言為主導，保持中文頻道只回中文、英文頻道只回英文
     const channelLang = detectLanguage(message.channel);
-    const responseLang = inputLang || channelLang;
+    const responseLang = channelLang;
 
     // 組裝 system prompt
     const systemPrompt = buildSystemPrompt(responseLang, userMessage);
