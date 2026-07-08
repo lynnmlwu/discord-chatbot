@@ -15,7 +15,7 @@ export function onReady(client) {
     
     if (isWorking) {
       client.user.setPresence({
-        activities: [{ name: '🟢 Listening to Emovia', type: 0 }],
+        activities: [{ name: '🟢 Listening to Emovia voices', type: 0 }],
         status: 'online',
       });
     } else {
