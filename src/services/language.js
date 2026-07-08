@@ -19,16 +19,22 @@ export function detectLanguage(channel) {
     return 'en';
   }
 
-  // 2. 檢查頻道名稱是否含中文字
+  // 2. 檢查分類名稱（Category）是否為英文類別
+  const parentNameLower = channel.parent?.name?.toLowerCase() || '';
+  if (enKeywords.some((kw) => parentNameLower.includes(kw))) {
+    return 'en';
+  }
+
+  // 3. 檢查頻道名稱是否含中文字
   if (CJK_REGEX.test(channel.name)) {
     return 'zh';
   }
 
-  // 3. 檢查分類名稱（Category）是否含中文字
+  // 4. 檢查分類名稱（Category）是否含中文字
   if (channel.parent?.name && CJK_REGEX.test(channel.parent.name)) {
     return 'zh';
   }
 
-  // 4. 如果都無法判斷，預設英文
+  // 5. 如果都無法判斷，預設英文
   return 'en';
 }

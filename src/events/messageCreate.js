@@ -14,10 +14,21 @@ const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/;
 function detectInputLanguage(text) {
   const cleaned = text.replace(/\s/g, '');
   if (cleaned.length === 0) return null; // 空訊息無法判斷語言
+
+  // 如果只包含拉丁字母與標點，就判斷為英文
+  if (/^[\p{ASCII}]+$/u.test(cleaned) && /[A-Za-z]/.test(cleaned)) {
+    return 'en';
+  }
+
   // 用 split 計算 CJK 字元數（比 match+g 更可靠，無 lastIndex 狀態問題）
   const cjkCount = cleaned.split('').filter(c => CJK_REGEX.test(c)).length;
   const ratio = cjkCount / cleaned.length;
-  return ratio > 0.3 ? 'zh' : 'en';
+
+  if (cjkCount > 0) {
+    return ratio > 0.3 ? 'zh' : 'en';
+  }
+
+  return 'en';
 }
 
 const DISCORD_MSG_LIMIT = 2000;
