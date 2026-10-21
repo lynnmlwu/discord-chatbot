@@ -3,6 +3,7 @@ import { config } from './config.js';
 import { onReady } from './events/ready.js';
 import { onMessageCreate } from './events/messageCreate.js';
 import { startDungeonReminder } from './services/reminder.js';
+import { startAnnouncements } from './services/announcements.js';
 
 const client = new Client({
   intents: [
@@ -16,6 +17,7 @@ const client = new Client({
 // 事件綁定
 client.once('clientReady', () => {
   onReady(client);
+  startAnnouncements(client);
   // startDungeonReminder(client, {
   //   zh: config.discord.dungeonReminderChannelId,
   //   en: config.discord.dungeonReminderEnglishChannelId,

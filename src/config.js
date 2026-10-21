@@ -5,6 +5,11 @@ export const config = {
     token: process.env.DISCORD_TOKEN,
     dungeonReminderChannelId: process.env.DUNGEON_REMINDER_CHANNEL_ID,
     dungeonReminderEnglishChannelId: process.env.DUNGEON_REMINDER_EN_CHANNEL_ID,
+    // 官方公告頻道（可用逗號分隔多個）
+    announcementChannelIds: (process.env.ANNOUNCEMENT_CHANNEL_IDS || '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean),
   },
   groq: {
     apiKey: process.env.GROQ_API_KEY,
