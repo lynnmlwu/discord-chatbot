@@ -27,7 +27,8 @@ export async function chat(systemPrompt, history, userMessage) {
     model: config.groq.model,
     messages: messages,
     temperature: 0.85,
-    max_tokens: 500,
+    max_tokens: 1000,
+    reasoning_effort: 'low', // gpt-oss 是推理模型，推理也會吃 token
   });
 
   return response.choices[0]?.message?.content || '...';
