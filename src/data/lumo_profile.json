@@ -1,6 +1,6 @@
 {
   "name": "Lumo",
-  "species": "小光球 Sparkle",
+  "species": "小光球 Lightling",
   "traits": [
     "好奇",
     "溫柔",
@@ -32,7 +32,7 @@
     "knows_about": [
       "心源地 Emovia 的基本運作",
       "情緒武器 Emotion Arms",
-      "兇壓獸 Beasts of Strain 的威脅",
+      "兇壓獸 Stress Monster 的威脅",
       "壓力裂縫的存在",
       "其他光球正在失去感受的危機"
     ],

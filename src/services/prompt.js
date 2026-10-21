@@ -74,7 +74,7 @@ function selectRelevantLore(userMessage) {
     world_history: ['世界', '歷史', '舊世界', '裂縫', 'world', 'history', 'old world', 'crack', 'rift'],
     emovia: ['心源地', '情緒', '能量', 'emovia', 'emotium', 'emotion', 'energy', 'heartland'],
     emotion_arms: ['武器', '情緒武器', '戰鬥', 'weapon', 'arms', 'fight', 'battle', '火焰', '冰弓'],
-    beasts_of_strain: ['兇壓獸', '敵人', '壓力', '怪物', 'beast', 'enemy', 'strain', 'pressure', 'boss', '零之核', 'null'],
+    beasts_of_strain: ['兇壓獸', '兇壓巨獸', '敵人', '壓力', '怪物', 'stress monster', 'monster', 'behemoth', 'beast', 'enemy', 'pressure', 'boss', '零之核', 'null'],
     pressure_points: ['關卡', '節點', '地圖', 'level', 'stage', 'pressure point', '眼睛', '時鐘'],
     companions: ['旅伴', '寵物', '夥伴', 'companion', 'pet', 'partner', 'friend'],
     characters: ['角色', '光球', '選擇', 'character', 'lightling', 'choose', 'play'],
