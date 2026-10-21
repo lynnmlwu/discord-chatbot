@@ -2,6 +2,14 @@ import { detectLanguage } from '../services/language.js';
 import { buildSystemPrompt } from '../services/prompt.js';
 import { chat } from '../services/llm.js';
 import { memory } from '../services/memory.js';
+import { isWorkingHours, isRateLimited, enterRateLimitRest } from '../services/status.js';
+
+/** 額度用完時的回覆 */
+function tiredMessage(lang) {
+  return lang === 'zh'
+    ? '💤 （耳朵慢慢垂下）光光今天聊太多了，有點累……讓我休息一下，等等再來找我好嗎？'
+    : "💤 (ears slowly droop) Lumo has chatted a lot today and needs a little rest... come find me again in a bit?";
+}
 
 const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/;
 
@@ -87,18 +95,18 @@ export async function onMessageCreate(message, client) {
     .trim();
 
   // 檢查營業時間 (台灣時間 週一到週五 10:00~19:00)
-  const now = new Date();
-  const twTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-  const day = twTime.getUTCDay();
-  const hour = twTime.getUTCHours();
-  const isWorking = (day >= 1 && day <= 5) && (hour >= 10 && hour < 19);
-
-  if (!isWorking) {
+  if (!isWorkingHours()) {
     const lang = detectLanguage(message.channel);
     const sleepMsg = lang === 'zh' 
       ? '💤 （光芒微弱... Lumo 正在睡覺休息中，他的出沒時間是平日 10:00 ~ 19:00 喔！）'
       : '💤 (Lumo is currently resting... his active hours are Mon-Fri 10:00 ~ 19:00 Taiwan Time!)';
     await message.reply(sleepMsg);
+    return;
+  }
+
+  // 額度用完休息中：直接回覆，不呼叫 API
+  if (isRateLimited()) {
+    await message.reply(tiredMessage(detectLanguage(message.channel)));
     return;
   }
 
@@ -148,11 +156,10 @@ export async function onMessageCreate(message, client) {
     console.error('[LUMO] Error:', error);
 
     const lang = detectLanguage(message.channel);
-    // 429 = Groq 免費額度用完（每日 token 上限），稍後會自動恢復
+    // 429 = Groq 免費額度用完（每日 token 上限），切換成休息狀態，時間到自動恢復
+    if (error.status === 429) enterRateLimitRest(error);
     const errorMsg = error.status === 429
-      ? lang === 'zh'
-        ? '💤 （耳朵慢慢垂下）光光今天聊太多了，有點累……讓我休息一下，等等再來找我好嗎？'
-        : "💤 (ears slowly droop) Lumo has chatted a lot today and needs a little rest... come find me again in a bit?"
+      ? tiredMessage(lang)
       : lang === 'zh'
         ? '💫 嗚...我的耳朵突然聽不太清楚了...可以再說一次嗎？'
         : "💫 Mmm... my ears got a bit fuzzy for a moment... could you say that again?";
