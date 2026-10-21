@@ -31,5 +31,12 @@ export async function chat(systemPrompt, history, userMessage) {
     reasoning_effort: 'low', // gpt-oss 是推理模型，推理也會吃 token
   });
 
+  // 記錄 token 用量（Groq 免費額度每天 20 萬 token，快取的 token 不算）
+  const usage = response.usage;
+  if (usage) {
+    const cached = usage.prompt_tokens_details?.cached_tokens ?? 0;
+    console.log(`[LLM] tokens: prompt ${usage.prompt_tokens} (cached ${cached}), completion ${usage.completion_tokens}`);
+  }
+
   return response.choices[0]?.message?.content || '...';
 }

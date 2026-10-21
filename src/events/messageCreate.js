@@ -148,8 +148,12 @@ export async function onMessageCreate(message, client) {
     console.error('[LUMO] Error:', error);
 
     const lang = detectLanguage(message.channel);
-    const errorMsg =
-      lang === 'zh'
+    // 429 = Groq 免費額度用完（每日 token 上限），稍後會自動恢復
+    const errorMsg = error.status === 429
+      ? lang === 'zh'
+        ? '💤 （耳朵慢慢垂下）光光今天聊太多了，有點累……讓我休息一下，等等再來找我好嗎？'
+        : "💤 (ears slowly droop) Lumo has chatted a lot today and needs a little rest... come find me again in a bit?"
+      : lang === 'zh'
         ? '💫 嗚...我的耳朵突然聽不太清楚了...可以再說一次嗎？'
         : "💫 Mmm... my ears got a bit fuzzy for a moment... could you say that again?";
     await message.reply(errorMsg);
