@@ -1,15 +1,24 @@
 import 'dotenv/config';
 
+/** 把「id1, id2」轉成 ['id1', 'id2'] */
+function idList(value) {
+  return (value || '').split(',').map((id) => id.trim()).filter(Boolean);
+}
+
 export const config = {
   discord: {
     token: process.env.DISCORD_TOKEN,
     dungeonReminderChannelId: process.env.DUNGEON_REMINDER_CHANNEL_ID,
     dungeonReminderEnglishChannelId: process.env.DUNGEON_REMINDER_EN_CHANNEL_ID,
-    // 官方公告頻道（可用逗號分隔多個）
-    announcementChannelIds: (process.env.ANNOUNCEMENT_CHANNEL_IDS || '')
-      .split(',')
-      .map((id) => id.trim())
-      .filter(Boolean),
+    // 光光會讀取的官方頻道（逗號分隔多個）：中文、英文、兩種語言共用
+    // mainZh / mainEn 是「官方公告」頻道，光光說「之後會在公告跟大家說」時會標出這個頻道
+    announcementChannels: {
+      zh: idList(process.env.ANNOUNCEMENT_CHANNEL_IDS_ZH),
+      en: idList(process.env.ANNOUNCEMENT_CHANNEL_IDS_EN),
+      shared: idList(process.env.ANNOUNCEMENT_CHANNEL_IDS),
+      mainZh: idList(process.env.MAIN_ANNOUNCEMENT_CHANNEL_ZH),
+      mainEn: idList(process.env.MAIN_ANNOUNCEMENT_CHANNEL_EN),
+    },
   },
   groq: {
     apiKey: process.env.GROQ_API_KEY,
