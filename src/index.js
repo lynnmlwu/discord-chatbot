@@ -4,6 +4,7 @@ import { onReady } from './events/ready.js';
 import { onMessageCreate } from './events/messageCreate.js';
 import { startDungeonReminder } from './services/reminder.js';
 import { startAnnouncements } from './services/announcements.js';
+import { startIdleChat } from './services/idleChat.js';
 
 const client = new Client({
   intents: [
@@ -18,6 +19,7 @@ const client = new Client({
 client.once('clientReady', () => {
   onReady(client);
   startAnnouncements(client);
+  startIdleChat(client); // 頻道太安靜時，每天主動發一則訊息
   // startDungeonReminder(client, {
   //   zh: config.discord.dungeonReminderChannelId,
   //   en: config.discord.dungeonReminderEnglishChannelId,
