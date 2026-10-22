@@ -10,6 +10,13 @@ export const config = {
     token: process.env.DISCORD_TOKEN,
     dungeonReminderChannelId: process.env.DUNGEON_REMINDER_CHANNEL_ID,
     dungeonReminderEnglishChannelId: process.env.DUNGEON_REMINDER_EN_CHANNEL_ID,
+    // 聊天頻道的語言（逗號分隔多個）：zh 只回中文、en 只回英文、both 依玩家輸入的語言回覆
+    // 沒有列在這裡的頻道，會依頻道名稱判斷語言
+    chatChannels: {
+      zh: idList(process.env.CHAT_CHANNEL_IDS_ZH),
+      en: idList(process.env.CHAT_CHANNEL_IDS_EN),
+      both: idList(process.env.CHAT_CHANNEL_IDS_BOTH),
+    },
     // 光光會讀取的官方頻道（逗號分隔多個）：中文、英文、兩種語言共用
     // mainZh / mainEn 是「官方公告」頻道，光光說「之後會在公告跟大家說」時會標出這個頻道
     announcementChannels: {

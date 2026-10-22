@@ -1,4 +1,4 @@
-import { detectLanguage } from '../services/language.js';
+import { resolveReplyLanguage } from '../services/language.js';
 import { buildSystemPrompt } from '../services/prompt.js';
 import { chat } from '../services/llm.js';
 import { memory } from '../services/memory.js';
@@ -9,34 +9,6 @@ function tiredMessage(lang) {
   return lang === 'zh'
     ? '💤 （耳朵慢慢垂下）光光今天聊太多了，有點累……讓我休息一下，等等再來找我好嗎？'
     : "💤 (ears slowly droop) Lumo has chatted a lot today and needs a little rest... come find me again in a bit?";
-}
-
-const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/;
-
-/**
- * 偵測輸入文字的主要語言
- * 如果超過 30% 是 CJK 字元，判定為中文
- * @param {string} text
- * @returns {'zh'|'en'|null}
- */
-function detectInputLanguage(text) {
-  const cleaned = text.replace(/\s/g, '');
-  if (cleaned.length === 0) return null; // 空訊息無法判斷語言
-
-  // 如果只包含拉丁字母與標點，就判斷為英文
-  if (/^[\p{ASCII}]+$/u.test(cleaned) && /[A-Za-z]/.test(cleaned)) {
-    return 'en';
-  }
-
-  // 用 split 計算 CJK 字元數（比 match+g 更可靠，無 lastIndex 狀態問題）
-  const cjkCount = cleaned.split('').filter(c => CJK_REGEX.test(c)).length;
-  const ratio = cjkCount / cleaned.length;
-
-  if (cjkCount > 0) {
-    return ratio > 0.3 ? 'zh' : 'en';
-  }
-
-  return 'en';
 }
 
 const DISCORD_MSG_LIMIT = 2000;
@@ -94,9 +66,12 @@ export async function onMessageCreate(message, client) {
     .replace(new RegExp(`<@!?${client.user.id}>`, 'g'), '')
     .trim();
 
+  // 這則訊息要用的語言：中文頻道回中文、英文頻道回英文、雙語頻道依玩家輸入的語言
+  const { lang: replyLang, bilingual } = resolveReplyLanguage(message.channel, userMessage);
+
   // 檢查營業時間 (台灣時間 週一到週五 10:00~19:00)
   if (!isWorkingHours()) {
-    const lang = detectLanguage(message.channel);
+    const lang = replyLang;
     const sleepMsg = lang === 'zh' 
       ? '💤 （光芒微弱... Lumo 正在睡覺休息中，他的出沒時間是平日 10:00 ~ 19:00 喔！）'
       : '💤 (Lumo is currently resting... his active hours are Mon-Fri 10:00 ~ 19:00 Taiwan Time!)';
@@ -106,13 +81,13 @@ export async function onMessageCreate(message, client) {
 
   // 額度用完休息中：直接回覆，不呼叫 API
   if (isRateLimited()) {
-    await message.reply(tiredMessage(detectLanguage(message.channel)));
+    await message.reply(tiredMessage(replyLang));
     return;
   }
 
   // 如果 mention 了但沒有實際內容
   if (!userMessage) {
-    const lang = detectLanguage(message.channel);
+    const lang = replyLang;
     const greeting =
       lang === 'zh'
         ? '✨ 嗨！你在叫我嗎？我聽到你的聲音了～有什麼想聊的嗎？'
@@ -126,12 +101,11 @@ export async function onMessageCreate(message, client) {
     await message.channel.sendTyping();
 
     // 以頻道語言為主導，保持中文頻道只回中文、英文頻道只回英文
-    const channelLang = detectLanguage(message.channel);
-    const responseLang = channelLang;
+    const responseLang = replyLang;
     const channelName = message.channel.name || 'unknown';
 
     // 組裝 system prompt
-    const systemPrompt = buildSystemPrompt(responseLang, userMessage, channelName);
+    const systemPrompt = buildSystemPrompt(responseLang, userMessage, channelName, { bilingual });
 
     // 取得對話歷史
     const history = memory.getHistory(message.author.id);
@@ -155,7 +129,7 @@ export async function onMessageCreate(message, client) {
   } catch (error) {
     console.error('[LUMO] Error:', error);
 
-    const lang = detectLanguage(message.channel);
+    const lang = replyLang;
     // 429 = Groq 免費額度用完（每日 token 上限），切換成休息狀態，時間到自動恢復
     if (error.status === 429) enterRateLimitRest(error);
     const errorMsg = error.status === 429
