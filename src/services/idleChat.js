@@ -41,13 +41,16 @@ function twNow() {
   return { date: tw.toISOString().slice(0, 10), minutes: tw.getUTCHours() * 60 + tw.getUTCMinutes() };
 }
 
-function todayPlan(channelId) {
+const hhmm = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+
+function todayPlan(channelId, channelName = channelId) {
   const { date } = twNow();
   let p = plan.get(channelId);
   if (!p || p.date !== date) {
     const target = WINDOW_START + Math.floor(Math.random() * (WINDOW_END - WINDOW_START));
     p = { date, target, posted: false };
     plan.set(channelId, p);
+    console.log(`[IdleChat] ${date} #${channelName} 預計 ${hhmm(target)} 之後，頻道安靜超過 2 小時就主動發訊息`);
   }
   return p;
 }
@@ -66,7 +69,11 @@ async function loadChannelState(client, channelId) {
     !m.reference &&
     new Date(m.createdTimestamp + 8 * 60 * 60 * 1000).toISOString().slice(0, 10) === date
   );
-  if (postedToday) todayPlan(channelId).posted = true;
+  const p = todayPlan(channelId, channel.name);
+  if (postedToday) {
+    p.posted = true;
+    console.log(`[IdleChat] #${channel.name} 今天已經主動發過訊息了`);
+  }
   return channel;
 }
 
@@ -89,7 +96,7 @@ async function check(client, channels) {
   if (!isWorkingHours() || isRateLimited()) return;
   const { minutes } = twNow();
   for (const { channel, lang } of channels) {
-    const p = todayPlan(channel.id);
+    const p = todayPlan(channel.id, channel.name);
     if (p.posted || minutes < p.target) continue;
     const idleFor = Date.now() - (lastActivity.get(channel.id) ?? 0);
     if (idleFor < IDLE_MS) continue;

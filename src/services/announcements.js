@@ -96,6 +96,7 @@ async function fetchChannelPosts(channel) {
 export async function refreshAnnouncements(client) {
   const next = [];
   for (const { id, lang } of channelList()) {
+    const before = next.length;
     try {
       const channel = await client.channels.fetch(id);
       const posts = await fetchChannelPosts(channel);
@@ -116,7 +117,10 @@ export async function refreshAnnouncements(client) {
         });
       }
     } catch (err) {
-      console.error(`[Announcements] 無法讀取頻道 ${id}：${err.message}`);
+      // 讀取失敗（例如網路暫時斷線）時沿用這個頻道上一次讀到的內容，不要清空
+      next.splice(before);
+      next.push(...chunks.filter((c) => c.channelId === id));
+      console.error(`[Announcements] 無法讀取頻道 ${id}，先沿用上次的內容：${err.message}`);
     }
   }
   next.sort((a, b) => b.time - a.time || a.index - b.index);
